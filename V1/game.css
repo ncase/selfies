@@ -1,0 +1,38 @@
+body{
+	margin:0;
+	background: #000;
+}
+#game{
+	width:960px; height:480px;
+	background: #fff;
+
+	position: absolute;
+	margin: auto;
+	top:0; bottom:0; left:0; right:0;
+}
+#canvas{
+	background: #da7a55;
+	position: absolute;
+	top:0; left:0;
+}
+#tweet{
+	width:270px; height:430px;
+	padding:25px;
+
+	overflow: hidden;
+
+	transition: left 1s ease-in-out;
+	position: absolute;
+	left:320px;
+}
+#tweet #photo{
+	border:1px solid #ddd;
+	width:268px; height:148px;
+}
+#tweet #stats{
+	font-family: sans-serif;
+	font-size: 20px;
+	font-weight: 100;
+	margin-top: 10px;
+	line-height: 1.5em;
+}
