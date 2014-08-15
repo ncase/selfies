@@ -16,6 +16,7 @@ body{
 	background: #da7a55;
 	position: absolute;
 	top:0; left:0;
+	cursor: none;
 }
 #social{
 	width:270px; height:430px;

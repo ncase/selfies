@@ -15,6 +15,32 @@ window.onmousemove = function(e){
 }
 
 // KEYS //
+var Key = {};
+var KEY_CODES = {
+	37:"left", 38:"up", 39:"right", 40:"down",
+	65:"left", 87:"up", 68:"right", 83:"down",
+	16:"shift", 32:"space",
+	27:"pause", 80:"pause"
+};
+Key.onKeyDown = function(event){
+	var code = KEY_CODES[event.keyCode];
+    Key[code] = true;
+    if(code=="pause"){
+    	Game.togglePause();
+    }
+    event.stopPropagation();
+    event.preventDefault();
+}
+Key.onKeyUp = function(event){
+	var code = KEY_CODES[event.keyCode];
+    Key[code] = false;
+    event.stopPropagation();
+    event.preventDefault();
+}
+window.top.addEventListener("keydown",Key.onKeyDown,false);
+window.top.addEventListener("keyup",Key.onKeyUp,false);
+window.addEventListener("keydown",Key.onKeyDown,false);
+window.addEventListener("keyup",Key.onKeyUp,false);
 
 // CLICK //
 
@@ -41,9 +67,9 @@ window.onclick = function(){
 	scrollY += photo.height+10;
 
 	// Remove old photos
-	while(socialDOM.children.length>4){
+	/*while(socialDOM.children.length>4){
 		socialDOM.removeChild(socialDOM.children[0]);
-	}
+	}*/
 
 	// Flash
 	cam.flash = 1;
@@ -62,6 +88,7 @@ var cam = {
 
 // IMAGES //
 var reporterImage = document.getElementById("reporter");
+var bgImage = document.getElementById("bg");
 
 // SPRITE //
 function Sprite(image){
@@ -79,31 +106,90 @@ function Sprite(image){
 
 	self.draw = function(ctx){
 		ctx.save();
-		ctx.translate(self.x-self.regX, self.y-self.regY);
-		ctx.scale(self.scaleX,self.scaleY);
+		ctx.translate(self.x, self.y);
+		ctx.scale(self.scaleX,self.scaleY)
+		ctx.translate(-self.regX,-self.regY);
 		ctx.drawImage(self.image,0,0);
 		ctx.restore();
 	};
 
 }
 
-var player = new Sprite(reporterImage);
-player.x = 200;
-player.y = 200;
+var background = new Sprite(bgImage);
+background.regX = 0;
+background.regY = 0;
+
+// PLAYER //
+var player = (function(){
+
+	var player = new Sprite(reporterImage);
+	player.x = 200;
+	player.y = 240;
+	player.scaleX = 0.5;
+	player.scaleY = 0.5;
+
+	var hopAnim = 0;
+
+	player.update = function(){
+
+		if(Key.left){
+			player.x -= 4;
+			player.scaleX = -0.5;
+		}
+		if(Key.right){
+			player.x += 4;
+			player.scaleX = 0.5;
+		}
+		if(Key.up) player.y -= 3;
+		if(Key.down) player.y += 3;
+
+		if(!(Key.left || Key.right || Key.up || Key.down)){
+			hopAnim = 0;
+		}else{
+			hopAnim = (hopAnim+1)%6;
+		}
+		player.regY = (hopAnim<3) ? 200 : 206;
+
+	};
+
+	return player;
+
+})();
+
+var worldX = 0;
 
 function render(){
 
 	// Clear
 	ctx.clearRect(0, 0, canvas.width, canvas.height);
 
+	// World Camera Position
+	ctx.save();
+	ctx.translate(-worldX,0);
+
 	// Draw BG
-	ctx.fillStyle = "#DA7A55";
-	ctx.fillRect(0,0,canvas.width,canvas.height);
+	background.draw(ctx);
 
 	// Draw Player
+	player.update();
 	player.draw(ctx);
+	if(player.y<20){ player.y=20; }
+	if(player.y>480){ player.y=480; }
+	if(player.x<worldX){
+		player.x=worldX;
+	}
+	if(player.x>worldX+640){
+		player.x = worldX+640;
+	}
+	if(player.x>worldX+320){
+		worldX = player.x-320;
+		if(worldX>640) worldX=640;
+	}
 
-	// Camera Position
+	// World Camera Position
+	ctx.restore();
+
+	// Your Camera Position
 	var x = Mouse.x;
 	if(x<cam.width/2) x=cam.width/2;
 	if(x>canvas.width-cam.width/2) x=canvas.width-cam.width/2;
@@ -113,9 +199,9 @@ function render(){
 	cam.x = x;
 	cam.y = y;
 
-	// Camera frame
+	// Your Camera frame
 	ctx.beginPath();
-	ctx.rect(cam.x-cam.width/2-4, cam.y-cam.height/2-4, cam.width+8, cam.height+8);
+	ctx.rect(cam.x-cam.width/2, cam.y-cam.height/2, cam.width, cam.height);
 	if(cam.flash>0.01){
 		ctx.fillStyle = 'rgba(255,255,255,'+cam.flash+')';
 		ctx.fill();
@@ -123,9 +209,22 @@ function render(){
 	}else{
 		cam.flash = 0;
 	}
+	var left = cam.x-cam.width/2-2;
+	var right = cam.x+cam.width/2+2;
+	var top = cam.y-cam.height/2-2;
+	var bottom = cam.y+cam.height/2+2;
+	ctx.beginPath();
 	ctx.lineWidth = 4;
 	ctx.strokeStyle = 'rgba(0,0,0,0.2)';
+	ctx.moveTo(left,top+50); ctx.lineTo(left,top); ctx.lineTo(left+50,top);
+	ctx.moveTo(right-50,top); ctx.lineTo(right,top); ctx.lineTo(right,top+50);
+	ctx.moveTo(right,bottom-50); ctx.lineTo(right,bottom); ctx.lineTo(right-50,bottom);
+	ctx.moveTo(left+50,bottom); ctx.lineTo(left,bottom); ctx.lineTo(left,bottom-50);
 	ctx.stroke();
+	/*ctx.beginPath();
+	ctx.fillStyle = 'rgba(0,0,0,0.2)';
+	ctx.arc(cam.x, cam.y, 4, 0, 2 * Math.PI, false);
+	ctx.fill();*/
 
 }
 
