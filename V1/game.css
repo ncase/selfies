@@ -1,6 +1,10 @@
 body{
 	margin:0;
 	background: #000;
+
+	font-family: sans-serif;
+	font-weight: 100;
+	font-size: 25px;
 }
 #game{
 
@@ -12,8 +16,8 @@ body{
 	margin: auto;
 	top:0; bottom:0; left:0; right:0;
 }
-#canvas{
-	background: #da7a55;
+#cam_canvas, #canvas{
+	/*background: #da7a55;*/
 	position: absolute;
 	top:0; left:0;
 	cursor: none;
@@ -22,7 +26,12 @@ body{
 	width:270px; height:430px;
 	padding:25px;
 
+	-webkit-transition: top 0.5s ease-in-out;
+	-moz-transition: top 0.5s ease-in-out;
+	-ms-transition: top 0.5s ease-in-out;
+	-o-transition: top 0.5s ease-in-out;
 	transition: top 0.5s ease-in-out;
+
 	position: absolute;
 	top:-150px; right:0;
 }

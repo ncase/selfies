@@ -1,7 +1,14 @@
+window.onload = function(){
+
 var canvas = document.getElementById("canvas");
 var ctx = canvas.getContext("2d");
 canvas.width = 640;
 canvas.height = 480;
+
+var cam_canvas = document.getElementById("cam_canvas");
+var cam_ctx = cam_canvas.getContext("2d");
+cam_canvas.width = canvas.width;
+cam_canvas.height = canvas.height;
 
 // MOUSE //
 
@@ -89,6 +96,10 @@ var cam = {
 // IMAGES //
 var reporterImage = document.getElementById("reporter");
 var bgImage = document.getElementById("bg");
+var lampImage = document.getElementById("lamppost");
+var shoot1Image = document.getElementById("shoot1");
+var shoot2Image = document.getElementById("shoot2");
+var trashImage = document.getElementById("trash");
 
 // SPRITE //
 function Sprite(image){
@@ -123,8 +134,8 @@ background.regY = 0;
 var player = (function(){
 
 	var player = new Sprite(reporterImage);
-	player.x = 200;
-	player.y = 240;
+	player.x = 76;
+	player.y = 130;
 	player.scaleX = 0.5;
 	player.scaleY = 0.5;
 
@@ -158,6 +169,44 @@ var player = (function(){
 
 var worldX = 0;
 
+var props = [player];
+for(var i=0;i<2;i++){
+	var lamp = new Sprite(lampImage);
+	lamp.regX = 19;
+	lamp.regY = 288;
+	lamp.x = 73 + i*640;
+	lamp.y = 447;
+	props.push(lamp);
+}
+
+var trash = new Sprite(trashImage);
+trash.x = 560;
+trash.y = 447;
+trash.scaleX=trash.scaleY=0.5;
+props.push(trash);
+
+var riot = new Sprite(shoot1);
+riot.x = 1100;
+riot.y = 280;
+riot.scaleX = riot.scaleY = 0.6;
+props.push(riot);
+
+riot.update = function(){
+
+	var self = riot;
+	var isHovered = false;
+	var cx = cam.x + worldX;
+	var cy = cam.y;
+	if(cx<self.x+cam.width/2 &&
+		cx>self.x-cam.width/2 &&
+		cy<self.y &&
+		cy>self.y-cam.height){
+		isHovered = true;
+	}
+	riot.image = isHovered ? shoot2 : shoot1;
+
+};
+
 function render(){
 
 	// Clear
@@ -170,9 +219,8 @@ function render(){
 	// Draw BG
 	background.draw(ctx);
 
-	// Draw Player
+	// Player/Camera interaction
 	player.update();
-	player.draw(ctx);
 	if(player.y<20){ player.y=20; }
 	if(player.y>480){ player.y=480; }
 	if(player.x<worldX){
@@ -186,8 +234,24 @@ function render(){
 		if(worldX>640) worldX=640;
 	}
 
+	// Riot update
+	riot.update();
+
+	// Draw PROPS
+	var props2 = props.sort(function(a,b){
+		return a.y-b.y;
+	});
+	for(var i=0;i<props2.length;i++){
+		props2[i].draw(ctx);
+	}
+
 	// World Camera Position
 	ctx.restore();
+
+	/////////////////////////////////
+
+	// Clear
+	cam_ctx.clearRect(0, 0, canvas.width, canvas.height);
 
 	// Your Camera Position
 	var x = Mouse.x;
@@ -200,11 +264,11 @@ function render(){
 	cam.y = y;
 
 	// Your Camera frame
-	ctx.beginPath();
-	ctx.rect(cam.x-cam.width/2, cam.y-cam.height/2, cam.width, cam.height);
+	cam_ctx.beginPath();
+	cam_ctx.rect(cam.x-cam.width/2, cam.y-cam.height/2, cam.width, cam.height);
 	if(cam.flash>0.01){
-		ctx.fillStyle = 'rgba(255,255,255,'+cam.flash+')';
-		ctx.fill();
+		cam_ctx.fillStyle = 'rgba(255,255,255,'+cam.flash+')';
+		cam_ctx.fill();
 		cam.flash *= 0.9;
 	}else{
 		cam.flash = 0;
@@ -213,18 +277,18 @@ function render(){
 	var right = cam.x+cam.width/2+2;
 	var top = cam.y-cam.height/2-2;
 	var bottom = cam.y+cam.height/2+2;
-	ctx.beginPath();
-	ctx.lineWidth = 4;
-	ctx.strokeStyle = 'rgba(0,0,0,0.2)';
-	ctx.moveTo(left,top+50); ctx.lineTo(left,top); ctx.lineTo(left+50,top);
-	ctx.moveTo(right-50,top); ctx.lineTo(right,top); ctx.lineTo(right,top+50);
-	ctx.moveTo(right,bottom-50); ctx.lineTo(right,bottom); ctx.lineTo(right-50,bottom);
-	ctx.moveTo(left+50,bottom); ctx.lineTo(left,bottom); ctx.lineTo(left,bottom-50);
-	ctx.stroke();
-	/*ctx.beginPath();
-	ctx.fillStyle = 'rgba(0,0,0,0.2)';
-	ctx.arc(cam.x, cam.y, 4, 0, 2 * Math.PI, false);
-	ctx.fill();*/
+	cam_ctx.beginPath();
+	cam_ctx.lineWidth = 4;
+	cam_ctx.strokeStyle = 'rgba(0,0,0,0.2)';
+	cam_ctx.moveTo(left,top+50); cam_ctx.lineTo(left,top); cam_ctx.lineTo(left+50,top);
+	cam_ctx.moveTo(right-50,top); cam_ctx.lineTo(right,top); cam_ctx.lineTo(right,top+50);
+	cam_ctx.moveTo(right,bottom-50); cam_ctx.lineTo(right,bottom); cam_ctx.lineTo(right-50,bottom);
+	cam_ctx.moveTo(left+50,bottom); cam_ctx.lineTo(left,bottom); cam_ctx.lineTo(left,bottom-50);
+	cam_ctx.stroke();
+	/*cam_ctx.beginPath();
+	cam_ctx.fillStyle = 'rgba(0,0,0,0.2)';
+	cam_ctx.arc(cam.x, cam.y, 4, 0, 2 * Math.PI, false);
+	cam_ctx.fill();*/
 
 }
 
@@ -237,3 +301,4 @@ window.requestAnimFrame = window.requestAnimationFrame || window.webkitRequestAn
 	render();
 })();
 
+}

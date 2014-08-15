@@ -1,20 +1,23 @@
-<!--
-
-1) Moving frame
-2) Taking picture with the frame...
-3) Detecting what's in the frame vs not
-
--->
-
 <link rel="stylesheet" href="game.css" type="text/css">
 <div id="game">
-	<div id="social"></div>
+	<div id="social">
+		<div style="position:absolute; top:300px;">
+			WASD / ARROW KEYS<br>to move.
+			<br><br>
+			CLICK MOUSE<br>to take a selfie.
+		</div>
+	</div>
 	<canvas id="canvas"></canvas>
+	<canvas id="cam_canvas"></canvas>
 </div>
 
 <span style="display:none">
 	<img src="bg.png" id="bg">
 	<img src="reporter.png" id="reporter">
+	<img src="lamppost.png" id="lamppost">
+	<img src="shoot1.png" id="shoot1">
+	<img src="shoot2.png" id="shoot2">
+	<img src="trash.png" id="trash">
 </span>
 
 <script src="game.js"></script>
