@@ -14,25 +14,36 @@ window.onmousemove = function(e){
 	Mouse.y = e.clientY - canvas.offsetTop - canvas.parentNode.offsetTop;
 }
 
+// KEYS //
+
 // CLICK //
 
-var tweetDOM = document.getElementById("tweet");
-var lastPhoto;
+var socialDOM = document.getElementById("social");
+var scrollY = 10;
+
 window.onclick = function(){
+
+	//if(cam.flash!=0) return;
 
 	// Get image data
 	var imageData = ctx.getImageData(cam.x-cam.width/2, cam.y-cam.height/2, cam.width, cam.height);
 
 	// Snap photo
-	var photo = document.getElementById("photo");
+	var photo = document.createElement("canvas");
 	photo.width = cam.width;
 	photo.height = cam.height;
 	photo.getContext("2d").putImageData(imageData,0,0);
 
-	// HACK: The text on this photo
-	var stats = document.getElementById("stats");
-	stats.innerHTML = "1,000,000 RETWEETS<br>10,000,000 FAVORITES";
-	tweetDOM.style.left = "640px";
+	// Add photo
+	photo.style.top = -(scrollY-10)+"px";
+	socialDOM.appendChild(photo);
+	socialDOM.style.top = scrollY+"px";
+	scrollY += photo.height+10;
+
+	// Remove old photos
+	while(socialDOM.children.length>4){
+		socialDOM.removeChild(socialDOM.children[0]);
+	}
 
 	// Flash
 	cam.flash = 1;
@@ -48,14 +59,49 @@ var cam = {
 	height: 150,
 	flash: 0
 };
-var placekitten = document.getElementById("placekitten");
+
+// IMAGES //
+var reporterImage = document.getElementById("reporter");
+
+// SPRITE //
+function Sprite(image){
+
+	var self = this;
+	self.image = image;
+
+	self.x = 0;
+	self.y = 0;
+	self.regX = image.width/2;
+	self.regY = image.height;
+
+	self.scaleX = 1;
+	self.scaleY = 1;
+
+	self.draw = function(ctx){
+		ctx.save();
+		ctx.translate(self.x-self.regX, self.y-self.regY);
+		ctx.scale(self.scaleX,self.scaleY);
+		ctx.drawImage(self.image,0,0);
+		ctx.restore();
+	};
+
+}
+
+var player = new Sprite(reporterImage);
+player.x = 200;
+player.y = 200;
+
 function render(){
 
 	// Clear
 	ctx.clearRect(0, 0, canvas.width, canvas.height);
 
 	// Draw BG
-	ctx.drawImage(placekitten,0,0);
+	ctx.fillStyle = "#DA7A55";
+	ctx.fillRect(0,0,canvas.width,canvas.height);
+
+	// Draw Player
+	player.draw(ctx);
 
 	// Camera Position
 	var x = Mouse.x;
@@ -74,6 +120,8 @@ function render(){
 		ctx.fillStyle = 'rgba(255,255,255,'+cam.flash+')';
 		ctx.fill();
 		cam.flash *= 0.9;
+	}else{
+		cam.flash = 0;
 	}
 	ctx.lineWidth = 4;
 	ctx.strokeStyle = 'rgba(0,0,0,0.2)';

@@ -3,8 +3,10 @@ body{
 	background: #000;
 }
 #game{
+
 	width:960px; height:480px;
 	background: #fff;
+	overflow: hidden;
 
 	position: absolute;
 	margin: auto;
@@ -15,24 +17,16 @@ body{
 	position: absolute;
 	top:0; left:0;
 }
-#tweet{
+#social{
 	width:270px; height:430px;
 	padding:25px;
 
-	overflow: hidden;
-
-	transition: left 1s ease-in-out;
+	transition: top 0.5s ease-in-out;
 	position: absolute;
-	left:320px;
+	top:-150px; right:0;
 }
-#tweet #photo{
+#social canvas{
+	position: absolute;
 	border:1px solid #ddd;
 	width:268px; height:148px;
-}
-#tweet #stats{
-	font-family: sans-serif;
-	font-size: 20px;
-	font-weight: 100;
-	margin-top: 10px;
-	line-height: 1.5em;
 }
